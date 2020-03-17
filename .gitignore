@@ -1,0 +1,8 @@
+# ide
+*.idea
+.metadata
+.recommenders
+repository
+.settings
+.classpath
+.project
