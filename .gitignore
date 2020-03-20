@@ -1,4 +1,5 @@
 # ide
+interface_record
 *.idea
 .metadata
 .recommenders
@@ -6,3 +7,4 @@ repository
 .settings
 .classpath
 .project
+
