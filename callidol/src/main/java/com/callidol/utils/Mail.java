@@ -42,5 +42,7 @@ public class Mail {
         //http://wwww.localhost.com/user/activation?code=sfsdfsf
         
         //http://wwww.localhost.com/user/activation?loincode=sfsdfsf
+        
+        
     }
 }
