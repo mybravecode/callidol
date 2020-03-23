@@ -16,31 +16,28 @@ import com.callidol.pojo.User;
 public class SessionUtil {
     @Autowired private RedisOp redis;
     
-    
+    // ----------------------------------模块：激活待注册用户---------------
+
+    //模块：激活待注册用户 
+    //传入 哈希且加盐的code  ,进行拼接操作
     public static String getActivationRegisterUserId(String code) {
     	return "activationCode-" + code + "-info";
     }
     
-    public static String getUserLoginUrlInfoId(String code) {
-    	return "login-url" + code + "-info";
-    }
-    
-    
-    
-    public boolean hasActivationRegisterUser(String code) {
-    	
+    //模块：激活待注册用户 
+    //传入 哈希且加盐的code(未拼接)  ,判断redis中是否 包含该键
+    public boolean hasActivationRegisterUser(String code) {  	
     	return redis.hasKey(getActivationRegisterUserId(code));
     }
     
-    
+    //模块：激活待注册用户 
     //将注册激活信息放入redis
     public void setActivationRegisterUser(String code, User user, int ttl) {
-    	String userJson = JsonUtil.objectToJson(user);
-	
-    	
+    	String userJson = JsonUtil.objectToJson(user);	
     	redis.set(getActivationRegisterUserId(code), userJson, ttl);
     }
     
+    //模块：激活待注册用户 
     //根据activationCode从redis中取出用户
     public User getActivationRegisterUser(String activationCode) {
     	String userJson = redis.get(getActivationRegisterUserId(activationCode));
@@ -52,7 +49,8 @@ public class SessionUtil {
     	return JsonUtil.jsonToPojo(userJson, User.class);
     }
     
-  //删除redis中activationCode对应的 用户待激活信息
+    //模块：激活待注册用户 
+    //删除redis中activationCode对应的 用户待激活信息
     public boolean removeActivationRegisterUser(String activationCode) {
         return redis.removeKey(getActivationRegisterUserId(activationCode));
     }
@@ -62,32 +60,34 @@ public class SessionUtil {
     
     
     // ----------------------------------通过点击邮箱中的链接 登录账号---------------
-   //删除redis中用户点击登录连接的信息
+    //模块：点击邮箱的链接，实现不用密码的登录
+    //传入 哈希且加盐的code  ,进行拼接操作
+    public static String getUserLoginUrlInfoId(String code) {
+    	return "login-url" + code + "-info";
+    }
+    
+    //删除redis中存储的“点击邮箱的链接，实现不用密码的登录”的信息
     public boolean removeUserLoginUrlInfo(String loginCode) {
         return redis.removeKey(getUserLoginUrlInfoId(loginCode));
     }
     
     
-  //将用户点击登录连接的信息放入redis
+    //将用户 code 和 mail 放入redis
     public void setUserLoginUrlInfo(String code, String mail, int ttl) {	
     	
     	redis.set(getUserLoginUrlInfoId(code), mail, ttl);
     }
     
-    //根据activationCode从redis中取出用户邮箱
+    //根据loginCode从redis中取出用户邮箱
     public String getUserLoginUrlInfo(String loginCode) {
-    	String mail = redis.get(getUserLoginUrlInfoId(loginCode));
-    	//redis里存了3个值么？redis.set(sessionId, userJson, ttl); 通过redis.get(sessionId)得到的是什么？userJson？
-    	
+    	String mail = redis.get(getUserLoginUrlInfoId(loginCode));	
     	return mail;
     }
     
     
-    //根据是否已经生成对应的链接
+    //根据loginCode判断 是否已经生成对应的链接、链接是否在有效期内
     public boolean hasUserLoginUrlInfo(String loginCode) {
-    	return redis.hasKey(getUserLoginUrlInfoId(loginCode));
-    	//redis里存了3个值么？redis.set(sessionId, userJson, ttl); 通过redis.get(sessionId)得到的是什么？userJson？
-    	
+    	return redis.hasKey(getUserLoginUrlInfoId(loginCode));    	
     }
     
     

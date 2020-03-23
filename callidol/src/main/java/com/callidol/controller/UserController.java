@@ -81,4 +81,15 @@ public class UserController {
 		
 		return userService.getUserLoginLink(mail);
 	}
+	
+	
+	@RequestMapping("/elogin")
+	public CIResult eloginUserByMail(@RequestParam String code, HttpServletResponse response) {
+		
+		//根据正则判断邮箱合法性 TODO
+		if(code == null || code == "")
+			return CIResult.error("无效登陆链接 无效loginCode，请检查邮箱中的登录链接是否正确");
+		
+		return userService.eloginUserByMail(code, response);
+	}
 }

@@ -116,28 +116,28 @@ public class UserServiceImpl implements UserService{
 		//查询数据库，判断这个用户是否存在
 		User userQ = new User();
 		userQ.setMail(mail);
-		User finUser = userMapper.selectOne(userQ);
-		if(finUser == null) {
+		User findUser = userMapper.selectOne(userQ);
+		if(findUser == null) {
 			return CIResult.error("该用户不存在");
 		}
 		
 		//finUser.getPassword().equals(HashUtil.hash(password)
-		if(!finUser.getPassword().equals(password)) {
+		if(!findUser.getPassword().equals(password)) {
 			return CIResult.error("用户密码输入错误");
 		}
 		
-		setCookieAndSession(userQ, response, 50*60*60);
+		setCookieAndSession(findUser, response, 5*60*60);
 		return CIResult.ok("用户登录成功");	
 	}
 
-	public void setCookieAndSession(User userQ, HttpServletResponse response, int ttl) {
+	public void setCookieAndSession(User user, HttpServletResponse response, int ttl) {
 		//设置cookie 
 //		CookieUtil.setCookie(cookieName, cookieValue, expire, response, path);	
 		String tokenValue = RandomUtil.randomStr();
 		CookieUtil.setCookie("user_token", tokenValue, ttl, response, "/");	
 		
 		//设置session
-		sessionUtil.setUserSession(tokenValue, userQ, ttl);
+		sessionUtil.setUserSession(tokenValue, user, ttl);
 		
 	}
 
@@ -174,8 +174,28 @@ public class UserServiceImpl implements UserService{
 		}
 		
 		return CIResult.ok();
+	}
+
+	@Override
+	public CIResult eloginUserByMail(String loginCode, HttpServletResponse response) {
+		String mail = sessionUtil.getUserLoginUrlInfo(loginCode);//根据loginCode从redis中取出用户邮箱
+		if(mail == null) {
+			return CIResult.error("登陆链接失效，重新获取登录链接，   eloginUserByMail()出错");
+		}
 		
+		User user = new User();
+		user.setMail(mail);
+
+		User findUser = userMapper.selectOne(user);
+		if(findUser == null) {
+			return CIResult.error("该用户不存在");
+		}
+		
+		findUser.setPassword("");
+		setCookieAndSession(findUser, response, 5*60*60);
+		sessionUtil.removeUserLoginUrlInfo(loginCode);
+
+		return CIResult.ok("用户登录成功");	
 	}
 	
-
 }

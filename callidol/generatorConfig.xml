@@ -32,7 +32,8 @@
 
 		<!--   <table tableName="user"></table>    -->
 		
-		<table tableName="user"></table>
+	<!--	<table tableName="user"></table>    -->
+		<table tableName="idol"></table>
 		
 		 
     </context>

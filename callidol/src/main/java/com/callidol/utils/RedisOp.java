@@ -21,8 +21,8 @@ public class RedisOp {
     
     public String get(String key) {
     	String val =  stringRedisTemplate.opsForValue().get(key);
-    	if (val.equals("null"))
-    		return null;
+//    	if (val.equals("null"))
+//    		return null;
     	return val;
     }
     

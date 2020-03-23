@@ -14,5 +14,7 @@ public interface UserService {
     public CIResult activateUser(String code);
     
     public CIResult getUserLoginLink(String mail);
+
+	public CIResult eloginUserByMail(String loginCode, HttpServletResponse response);
     
 }
