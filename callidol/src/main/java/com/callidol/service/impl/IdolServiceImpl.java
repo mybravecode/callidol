@@ -50,7 +50,6 @@ public class IdolServiceImpl implements IdolService{
 			idolResults.add(idolResult);
 		}
 		
-		
 		return CIResult.ok("ok", idolResults);
 	}
 

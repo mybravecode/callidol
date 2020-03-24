@@ -1,5 +1,6 @@
 package com.callidol.common;
 
+import com.callidol.utils.JsonUtil;
 
 /**
  *自定义响应数据结构
@@ -83,5 +84,8 @@ public class CIResult {
 		this.data = data;
 	}
     
-    
+    @Override
+    public String toString() {
+    	return JsonUtil.objectToJson(this);
+    }
 }

@@ -3,6 +3,7 @@ package com.callidol.service;
 import javax.servlet.http.HttpServletResponse;
 
 import com.callidol.common.CIResult;
+import com.callidol.pojo.User;
 
 public interface UserService {
 	
@@ -16,5 +17,9 @@ public interface UserService {
     public CIResult getUserLoginLink(String mail);
 
 	public CIResult eloginUserByMail(String loginCode, HttpServletResponse response);
+
+	public CIResult shareUserToIncrCallChance(User user);
+
+	public CIResult clickUserToIncrCallChance(String code);
     
 }

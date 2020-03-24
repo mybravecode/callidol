@@ -1,8 +1,8 @@
 package com.callidol.service.impl;
 
-import java.util.Random;
+import java.util.Date;
+import java.util.HashMap;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.callidol.common.CIResult;
+import com.callidol.common.UserResult;
+import com.callidol.interceptor.ValidatorInterceptor;
 import com.callidol.mapper.UserMapper;
 import com.callidol.pojo.User;
 import com.callidol.service.UserService;
@@ -19,6 +21,8 @@ import com.callidol.utils.Mail;
 import com.callidol.utils.RandomUtil;
 import com.callidol.utils.RedisOp;
 import com.callidol.utils.SessionUtil;
+
+import freemarker.core.Macro;
 
 
 @Service
@@ -36,7 +40,9 @@ public class UserServiceImpl implements UserService{
 	@Autowired
 	private SessionUtil sessionUtil;
 	
-		
+	@Autowired
+	private RedisOp redisOp;
+	
 	@Override
 	public CIResult registerUser(String mail, String nickname, String password) {
 		
@@ -134,7 +140,8 @@ public class UserServiceImpl implements UserService{
 		//设置cookie 
 //		CookieUtil.setCookie(cookieName, cookieValue, expire, response, path);	
 		String tokenValue = RandomUtil.randomStr();
-		CookieUtil.setCookie("user_token", tokenValue, ttl, response, "/");	
+		CookieUtil.setCookie(IdString.LoginTokenName, tokenValue, ttl, response, "/");	
+		//    public static String LoginTokenName = "user-token";
 		
 		//设置session
 		sessionUtil.setUserSession(tokenValue, user, ttl);
@@ -196,6 +203,91 @@ public class UserServiceImpl implements UserService{
 		sessionUtil.removeUserLoginUrlInfo(loginCode);
 
 		return CIResult.ok("用户登录成功");	
+	}
+
+	@Override
+	public CIResult shareUserToIncrCallChance(User user) {//？？？传User 比 传userId更好吧？
+		Long userId = user.getId();
+		String mail = user.getMail();
+//		public CIResult shareUserToIncrCallChance(String userId) {//？？？传User 比 传userId更好吧？
+		//----------------------------获取当前用户
+		
+		
+		//----------------------------获取剩余打榜次数
+		//当用户的restChance存在于redis中，直接得到用户的restChance
+		//当用户的restChance不存在于redis中，直接将用户的restChance赋值为0
+		long restChance = redisOp.hDecrement("RestCallChance", userId.toString(), 0);
+		//redisOp.hGet(key, field)  当用户的restChance不存在于redis中，返回为null
+
+		
+		//----------------------------生成并发送分享链接到邮箱
+
+		//需要生成一个用户可以直接点击登陆的链接			
+		String shareCode = HashUtil.hash(userId+"callidol123456789");
+
+				
+				//判断是否已经生成过分享链接
+//				if(sessionUtil.hasUserLoginUrlInfo(loginCode)) {
+//					return CIResult.error("登录链接已经生成，检查您的邮箱点击登录链接");
+//				}
+				
+				
+        String loginUrl = "<href>" + addr + "/apiv1/user/clickToIncrCallChance?code=" + shareCode + "</href>";
+		
+		// System.out.println(addr);
+		
+		try {
+			
+			sessionUtil.setShareUserToIncrCallChanceInfo(shareCode, mail, 5 * 60);
+			mailService.sendHtmlMail(mail, "快乐打榜注册登录链接", "点击该链接" + loginUrl + "可以登录账号，5分钟内有效");
+		}catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return CIResult.exception(e.getMessage());
+		}
+		HashMap<String, Object> returnMap = new HashMap<>();
+		returnMap.put("callChance", restChance);
+		returnMap.put("url", loginUrl);
+		
+		return CIResult.ok("分享专属链接成功",returnMap);
+	}
+
+	@Override
+	public CIResult clickUserToIncrCallChance(String sharecode) {
+		String mail = sessionUtil.getShareUserToIncrCallChanceInfo(sharecode);
+		User user = new User();
+		user.setMail(mail);
+		User shareUser = userMapper.selectOne(user);
+		String shareUserId = shareUser.getId().toString();//分享链接的用户
+		User currentUser = ValidatorInterceptor.getUser();	
+		System.out.println("============="+currentUser);
+
+		//////////////////////////////
+
+        Date date = new Date();
+        long currentTime = date.getTime();  
+        
+		//时间的判断
+		//当用户的getCallRestChanceTime存在于redis中，直接得到用户的getCallRestChanceTime
+		//当用户的getCallRestChanceTime不存在于redis中，直接将用户的getCallRestChanceTime赋值为0
+        
+		long clickUserToIncrCallChanceTime = redisOp.hIncrement("RestCallChance-clickUserToIncrCallChanceTime", currentUser.getId().toString(), 0);
+		
+		if(currentTime - clickUserToIncrCallChanceTime > 60 * 1000) {//1min 为了方便测试
+//			if(currentTime - clickUserToIncrCallChanceTime > 6 * 60 * 60 * 1000) {//6小时
+			long restChance = redisOp.hIncrement("RestCallChance", shareUserId, 3);
+//			UserResult userResult = new UserResult();
+//			userResult.setRestChance((int)restChance);
+						
+			//修改上次获取的时间
+			redisOp.hSet("RestCallChance-clickUserToIncrCallChanceTime", currentUser.getId().toString(), currentTime);
+			return CIResult.ok("点击专属链接成功","分享者的剩余打榜次数为"+restChance);
+		}else {
+			long needTime = 6 * 60  - (currentTime - clickUserToIncrCallChanceTime)/(60 * 1000);
+			return  CIResult.ok("免费获取打榜次数失败，还没有到6个小时", "还需要"+needTime+"分钟 到达6个小时");
+		}
+		//////////////////////////////
+		
 	}
 	
 }

@@ -90,31 +90,57 @@ public class SessionUtil {
     	return redis.hasKey(getUserLoginUrlInfoId(loginCode));    	
     }
     
+    // ----------------------------------获取某个用户的专属分享链接（用来增加用户的打榜次数)---------------
+    public static String getShareUserToIncrCallChanceInfoId(String sharecode) {
+    	return "share-url" + sharecode + "-info";
+    }
+    //删除redis中存储的“点击邮箱的链接，实现不用密码的登录”的信息
+    public boolean removeShareUserToIncrCallChanceInfo(String sharecode) {
+        return redis.removeKey(getShareUserToIncrCallChanceInfoId(sharecode));
+    }
     
+    
+    //将用户 sharecode 和 mail 放入redis
+    public void setShareUserToIncrCallChanceInfo(String sharecode, String mail, int ttl) {	
+    	
+    	redis.set(getShareUserToIncrCallChanceInfoId(sharecode), mail, ttl);
+    }
+    
+    //根据sharecode从redis中取出用户邮箱
+    public String getShareUserToIncrCallChanceInfo(String sharecode) {
+    	String mail = redis.get(getShareUserToIncrCallChanceInfoId(sharecode));	
+    	return mail;
+    }
+    
+    
+    //根据loginCode判断 是否已经生成对应的链接、链接是否在有效期内
+    public boolean hasShareUserToIncrCallChanceInfo(String sharecode) {
+    	return redis.hasKey(getShareUserToIncrCallChanceInfoId(sharecode));    	
+    }
    //----------------------------------------
     
     
     
-    //根据userId和User将用户信息保存到redis中作为一个信息session
-    public void setUserSession(int userId, User user, int ttl) {
-    	String userJson = JsonUtil.objectToJson(user);
-    	
-    	String sessionId = "userId-" + userId + "-info";
-    	redis.set(sessionId, userJson, ttl);
-    }
-    
-    
-   //根据userId从redis中取出用户
-    public User getUser(int userId) {
-    	String sessionId = "userId-" + userId + "-info";
-    	String userJson = redis.get(sessionId);
-    	//redis里存了3个值么？redis.set(sessionId, userJson, ttl); 通过redis.get(sessionId)得到的是什么？userJson？
-    	
-    	if(userJson == null)
-    		return null;
-    	
-    	return JsonUtil.jsonToPojo(userJson, User.class);
-    }
+//    //根据userId和User将用户信息保存到redis中作为一个信息session
+//    public void setUserSession(int userId, User user, int ttl) {
+//    	String userJson = JsonUtil.objectToJson(user);
+//    	
+//    	String sessionId = "userId-" + userId + "-info";
+//    	redis.set(sessionId, userJson, ttl);
+//    }
+//    
+//    
+//   //根据userId从redis中取出用户
+//    public User getUser(int userId) {
+//    	String sessionId = "userId-" + userId + "-info";
+//    	String userJson = redis.get(sessionId);
+//    	//redis里存了3个值么？redis.set(sessionId, userJson, ttl); 通过redis.get(sessionId)得到的是什么？userJson？
+//    	
+//    	if(userJson == null)
+//    		return null;
+//    	
+//    	return JsonUtil.jsonToPojo(userJson, User.class);
+//    }
    
   //根据token和User将用户信息保存到redis中作为一个信息session
     public void setUserSession(String tokenValue, User user, int ttl) {
@@ -124,9 +150,9 @@ public class SessionUtil {
     	redis.set(sessionId, userJson, ttl);
     }
     
-  //根据token从redis中取出用户
-    public User getUser(String token) {
-    	String sessionId = "userToken-" + token + "-info";
+    //根据token从redis中取出用户
+    public User getUser(String tokenValue) {
+    	String sessionId = "userToken-" + tokenValue + "-info";
     	String userJson = redis.get(sessionId);
     	
     	if(userJson == null)

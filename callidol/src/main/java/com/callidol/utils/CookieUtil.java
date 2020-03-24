@@ -26,12 +26,12 @@ public class CookieUtil {
     	Cookie []cookies = request.getCookies();
     			
     	if (cookies == null)
-    		return "";
+    		return null;
     	
     	for(Cookie c: cookies)
     		if(c.getName().equals(cookieName))
     			return c.getValue();
     	
-    	return "";
+    	return null;
     }
 }
