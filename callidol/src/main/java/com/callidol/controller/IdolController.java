@@ -28,7 +28,7 @@ public class IdolController {
 	//根据明星id查询明星信息
 	@RequestMapping("/info")
 	public CIResult getIdolInfoById(@RequestParam Long id) {
-		if(id < 0) {
+		if(id == null || id < 0) {
 			return CIResult.error("id < 0     请输入正确的id");
 		}
 		return idolService.getIdolInfoById(id);

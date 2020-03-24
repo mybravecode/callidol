@@ -101,15 +101,16 @@ public class SessionUtil {
     
     
     //将用户 sharecode 和 mail 放入redis
-    public void setShareUserToIncrCallChanceInfo(String sharecode, String mail, int ttl) {	
+    public void setShareUserToIncrCallChanceInfo(String sharecode, Long userId, int ttl) {	
     	
-    	redis.set(getShareUserToIncrCallChanceInfoId(sharecode), mail, ttl);
+    	redis.set(getShareUserToIncrCallChanceInfoId(sharecode), userId.toString(), ttl);
     }
     
-    //根据sharecode从redis中取出用户邮箱
-    public String getShareUserToIncrCallChanceInfo(String sharecode) {
-    	String mail = redis.get(getShareUserToIncrCallChanceInfoId(sharecode));	
-    	return mail;
+    //根据sharecode从redis中取出用户邮箱(id)
+    public long getShareUserToIncrCallChanceInfo(String sharecode) {
+    	String strId =  redis.get(getShareUserToIncrCallChanceInfoId(sharecode));
+    	return Long.parseLong(strId);
+    
     }
     
     

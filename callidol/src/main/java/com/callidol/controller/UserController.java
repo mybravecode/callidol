@@ -3,16 +3,11 @@ package com.callidol.controller;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.callidol.common.CIResult;
-import com.callidol.interceptor.ValidatorInterceptor;
-import com.callidol.mapper.UserMapper;
-import com.callidol.pojo.User;
 import com.callidol.service.UserService;
 
 
@@ -97,21 +92,4 @@ public class UserController {
 		return userService.eloginUserByMail(code, response);
 	}
 	
-	
-	//获取某个用户的专属分享链接（用来增加用户的打榜次数）
-	@RequestMapping("/shareToIncrCallChance")
-	public CIResult shareUserToIncrCallChance() {
-			
-		User user = ValidatorInterceptor.getUser();	
-//		return userService.shareUserToIncrCallChance(user.getId().toString());
-		return userService.shareUserToIncrCallChance(user);
-	}
-	
-	
-	//获取某个用户的专属分享链接（用来增加用户的打榜次数）
-	@RequestMapping("/clickToIncrCallChance")
-	public CIResult clickUserToIncrCallChance(@RequestParam String code) {
-			
-		return userService.clickUserToIncrCallChance(code);
-	}
 }

@@ -12,11 +12,52 @@ public class UserResult {
     
     private String pic;
     
+    //给某个明星打榜排行!!!!
     private Integer rank;
     
+    //给某个明星打榜数!!!!
     private Integer call;
     
+  //剩余打榜次数
     private Integer restChance;
+    
+    //专属分享链接
+    private String shareUrl;
+    
+    //上次获取免费打榜次数时间
+    private Long lastGetFreeChanceTime;
+    
+    //上次点击分享链接时间
+    private Long lastClickShareChance;
+    
+    
+    
+    public Long getLastGetFreeChanceTime() {
+		return lastGetFreeChanceTime;
+	}
+
+	public void setLastGetFreeChanceTime(Long lastGetFreeChanceTime) {
+		this.lastGetFreeChanceTime = lastGetFreeChanceTime;
+	}
+
+	public Long getLastClickShareChance() {
+		return lastClickShareChance;
+	}
+
+	public void setLastClickShareChance(Long lastClickShareChance) {
+		this.lastClickShareChance = lastClickShareChance;
+	}
+
+	
+    
+    
+	public String getShareUrl() {
+		return shareUrl;
+	}
+
+	public void setShareUrl(String shareUrl) {
+		this.shareUrl = shareUrl;
+	}
 
 	public Long getId() {
 		return id;

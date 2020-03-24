@@ -82,14 +82,15 @@ public class RedisOp {
     	return stringRedisTemplate.getExpire(key);
     }
     
-    
+    // --------------------hash----------
     public Object hGet(String key, String field) {
     	return stringRedisTemplate.opsForHash().get(key, field);
     }
     
-    public void hSet(String key, String field, Object value) {
-    	stringRedisTemplate.opsForHash().put(key, field, value.toString());
+    public void hSet(String key, Object field, Object value) {
+    	stringRedisTemplate.opsForHash().put(key, field.toString(), value.toString());
     }
+    
 //    “restChance”: Map<>;
 //    Map key:id, value: restChance;
     
@@ -97,9 +98,21 @@ public class RedisOp {
     	return stringRedisTemplate.opsForHash().increment(key, field, delta);
     }
     
-    public long hDecrement(String key, String field, long delta) {
-    	return stringRedisTemplate.opsForHash().increment(key, field, -delta);
+    public long hDecrement(String key, Object field, long delta) {
+    	return stringRedisTemplate.opsForHash().increment(key, field.toString(), -delta);
     }
     
+    
+    
+    //---------------zset------
+    //增加zset中某个成员的分数
+    public double zincr(String zsetName, Object member, double delta) {
+    	return stringRedisTemplate.opsForZSet().incrementScore(zsetName, member.toString(), delta);
+    }
+    
+    //获取zset中某个成员的分数和排名
+    public double zscoreAndRank(String zsetName, Object member) {
+    	return stringRedisTemplate.opsForZSet().score(zsetName, member.toString());//接受了多少次打榜
+    }
     
 }

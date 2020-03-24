@@ -28,11 +28,11 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
 		//添加一个身份验证的拦截器,用户在访问该网站时必须先进行身份验证才能访问
 		
 		registry.addInterceptor(getValidatorInterceptor())
-		.addPathPatterns("/apiv1/user/shareToIncrCallChance")
-		.addPathPatterns("/apiv1/user/clickToIncrCallChance")
+//		.addPathPatterns("/apiv1/user/shareToIncrCallChance")
+//		.addPathPatterns("/apiv1/user/clickToIncrCallChance")
 		.addPathPatterns("/apiv1/idol/**")
-		.addPathPatterns("/apiv1/call/**");
-		
+		.addPathPatterns("/apiv1/call/**")
+		.addPathPatterns("/apiv1/rank/**");
 //		.addPathPatterns("/collection/**")
 //		.addPathPatterns("/index")
 //		.addPathPatterns("/");
