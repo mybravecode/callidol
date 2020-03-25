@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.callidol.common.CIResult;
+import com.callidol.interceptor.ValidatorInterceptor;
 import com.callidol.service.IdolService;
 
 @RestController  // = Controller + ResponseBody 返回json字符串
@@ -31,7 +32,9 @@ public class IdolController {
 		if(id == null || id < 0) {
 			return CIResult.error("id < 0     请输入正确的id");
 		}
-		return idolService.getIdolInfoById(id);
+		long userId = ValidatorInterceptor.getUser().getId();
+		
+		return idolService.getIdolInfoById(id, userId); //idolId, userId
 	}
 
 

@@ -1,13 +1,18 @@
 package com.callidol.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import com.callidol.common.CIResult;
 import com.callidol.common.CallInCache;
+import com.callidol.common.RankAndScore;
 import com.callidol.common.UserInCache;
 import com.callidol.common.UserResult;
 import com.callidol.interceptor.ValidatorInterceptor;
@@ -23,7 +28,8 @@ import com.callidol.utils.SessionUtil;
 
 @Service
 public class CallServiceImpl implements CallService{
-    
+	
+	
 	@Value("${spring.service.addr}")
 	private String addr;
 		
@@ -96,7 +102,7 @@ public class CallServiceImpl implements CallService{
 		
 		//需要生成一个用户可以直接点击登陆的链接			
 		String shareCode = HashUtil.hash(userId+"callidol123456789");			
-        String shareUrl = "<href>" + addr + "/apiv1/user/clickShare?code=" + shareCode + "</href>";
+        String shareUrl = "<href>" + addr + "/apiv1/call/clickShare?code=" + shareCode + "</href>";
 		
         sessionUtil.setShareUserToIncrCallChanceInfo(shareCode, userId, 5 * 60);
         
@@ -166,26 +172,57 @@ public class CallServiceImpl implements CallService{
 	@Override
 	public CIResult callForIdol(long idolId, int callNum, long userId) {
 		
+		
+		
+//    	return redisOp.hIncrement(getUserMapName(userId), LastGetFreeChanceTime, 0);
+
+		
 		//1.判断明星对应id是否存在
 		Idol idol = idolMapper.selectByPrimaryKey(idolId); //null
 		if(idol == null)
 			return CIResult.error("明星id:" + idolId + "不存在");
         
 		//2.判断是否还有剩余次数并且减去次数
-		int restChance = userInCache.descRestCallChance(userId, callNum);
+		//
+		
+//		int restChance = userInCache.descRestCallChance(userId, callNum);
+		
+//		{"sucess": 1, "rest": 22}
+//		UserResult userResult = new UserResult();
+//		
+//		if(restChance < 0) {
+//			userInCache.addRestCallChance(userId, callNum);
+//			userResult.setRestChance(restChance + callNum);
+//			return CIResult.error("打榜剩余票数不够，请重新输入打榜次数", userResult);
+//		}
+		
+		//如果打榜成功则返回的restChance >=0 ，否则返回的restChance < 0且-restChance为剩余打榜次数
+		
+		int restChance = userInCache.queryAndSubRestChanceByCallNum(userId, callNum);
 		UserResult userResult = new UserResult();
 		
-		if(restChance < 0) {
-			userInCache.addRestCallChance(userId, callNum);
-			userResult.setRestChance(restChance + callNum);
+		
+		
+        if(restChance < 0) {
+        	if(restChance == -200)
+        		restChance = 0;
+        	RankAndScore userRankAndScore = callInCache.getUserRankAndScoreForIdolByWeek(userId, idolId, new DateUtil().getWeek());
+			userResult.setRestChance(-restChance);
+			userResult.setCall((int)userRankAndScore.getScore());
+			userResult.setRank(userRankAndScore.getRank());
 			return CIResult.error("打榜剩余票数不够，请重新输入打榜次数", userResult);
 		}
+        
+		//1 2 3 4 
 		
 		//3.增加明星对应的票数
 		//增加明星周榜月榜年榜  以及  某个明星打榜的周榜月榜年榜的用户排名
 		//避免代码太长太多单独分一个函数出来
 		userCallForHisIdol(userId, idolId, callNum);
 		
+		RankAndScore userRankAndScore = callInCache.getUserRankAndScoreForIdolByWeek(userId, idolId, new DateUtil().getWeek());
+		userResult.setRestChance(-restChance);
+		userResult.setCall((int)userRankAndScore.getScore());
 		userResult.setRestChance(restChance);
 		return CIResult.ok("打榜成功", userResult);
 	}

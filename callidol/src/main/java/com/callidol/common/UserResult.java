@@ -31,7 +31,7 @@ public class UserResult {
     private Long lastClickShareChance;
     
     
-    
+    //用户给明星打榜次数排名
     public Long getLastGetFreeChanceTime() {
 		return lastGetFreeChanceTime;
 	}

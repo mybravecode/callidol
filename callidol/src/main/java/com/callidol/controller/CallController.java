@@ -60,8 +60,8 @@ public class CallController {
 	    public CIResult callForIdol(@RequestParam Long idolId, @RequestParam Integer callNum) {
 			if(idolId == null)
 				return CIResult.error("明星id为空");
-			if(callNum == null || callNum <=0)
-				return CIResult.error("请输入合法的打榜次数，必须>0");
+			if(callNum == null || callNum <=0 || callNum >= 100)
+				return CIResult.error("请输入合法的打榜次数，必须>0 且 <=100");
 			
 			User user = ValidatorInterceptor.getUser();
 			

@@ -8,6 +8,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.callidol.common.CallInCache;
+import com.callidol.common.RankAndScore;
+import com.callidol.utils.RedisOp;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -15,6 +17,10 @@ public class TestZSet {
     
 	@Autowired
     private StringRedisTemplate redisTemplate;
+	
+	@Autowired
+	private RedisOp redisOp;
+	
 	
 	@Autowired
 	private CallInCache callInCache;
@@ -55,8 +61,13 @@ public class TestZSet {
 //		System.out.println(redisTemplate.opsForZSet().score(testkey, "ttt")); //10
 //		
 		
-		System.out.println(callInCache.getIdolCallNumWeek(123L));
 		
+//		keys.add("ZEEEET");
+//        keys.add("ttt");
+        
+		RankAndScore rankAndScore = redisOp.getRankAndScore("ZEEEET", "wdw");
+		System.out.println(rankAndScore.getRank());
+		System.out.println(rankAndScore.getScore());
 	}
 	
 	

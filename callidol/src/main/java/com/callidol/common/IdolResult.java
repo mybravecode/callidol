@@ -17,6 +17,27 @@ public class IdolResult {
     
     private Integer rank;
 
+    private Integer userRank;
+    
+    public Integer getUserRank() {
+		return userRank;
+	}
+
+	public void setUserRank(Integer userRank) {
+		this.userRank = userRank;
+	}
+
+	public Integer getUserCall() {
+		return userCall;
+	}
+
+	public void setUserCall(Integer userCall) {
+		this.userCall = userCall;
+	}
+
+	private Integer userCall;
+    
+    
 	public Long getId() {
 		return id;
 	}

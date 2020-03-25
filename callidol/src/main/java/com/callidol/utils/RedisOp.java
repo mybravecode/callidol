@@ -1,11 +1,16 @@
 package com.callidol.utils;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
+
+import com.callidol.common.RankAndScore;
 
 
 /*
@@ -15,6 +20,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RedisOp {
+	public final static String GetRankAndScoreScript = 
+			  "local rank = redis.call('ZREVRANK', KEYS[1], KEYS[2]);"//ZREVRANK 查询排名 key1:KEYS[1]  key2:KEYS[2]
+			+ "local res = {};"//返回给java的字典
+			+ "if rank == false then "//排名不存在
+			    + "local rank = redis.call('ZCARD', KEYS[1]) + 1; "//ZCARD 查询这个列表的大小。返回这个列表的总数
+			    + "res['score']=0.0; "
+			    + "res['rank'] = rank; "
+			    + "return cjson.encode(res);"//将字典转化为json字符串
+			+ "else "
+			+     "local score = redis.call('ZSCORE', KEYS[1], KEYS[2]);"//ZSCORE 求分数，求出来的是字符串
+			+     "res['score']=tonumber(score); "
+			+     "res['rank'] = rank + 1; "
+			+     "return cjson.encode(res);"
+			+ "end;";//将字典转化为json字符串
 	
 	/*
 	 *  redis性质上和mysql一样，都是用来存储数据的，mongo，kafka，nsq，es，不同的数据库有各自的优势和使用场景
@@ -103,7 +122,8 @@ public class RedisOp {
     }
     
     
-    
+    //- -----lua ------------
+   
     //---------------zset------
     //增加zset中某个成员的分数
     public double zincr(String zsetName, Object member, double delta) {
@@ -115,4 +135,18 @@ public class RedisOp {
     	return stringRedisTemplate.opsForZSet().score(zsetName, member.toString());//接受了多少次打榜
     }
     
+    //同时zset中同时获取分数和排名
+    public RankAndScore getRankAndScore(String zsetName, Object member) {	
+	    DefaultRedisScript<String> redisScript = new DefaultRedisScript<>();
+        redisScript.setScriptText(GetRankAndScoreScript);
+        redisScript.setResultType(String.class);
+        List<String> keys = new ArrayList<>();
+ 
+        keys.add(zsetName);
+        keys.add(member.toString());
+      
+        String rankAndScore = stringRedisTemplate.execute(redisScript, keys);
+      
+        return JsonUtil.jsonToPojo(rankAndScore, RankAndScore.class);
+    }
 }

@@ -32,7 +32,9 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
 //		.addPathPatterns("/apiv1/user/clickToIncrCallChance")
 		.addPathPatterns("/apiv1/idol/**")
 		.addPathPatterns("/apiv1/call/**")
-		.addPathPatterns("/apiv1/rank/**");
+		.addPathPatterns("/apiv1/rank/**")
+		.addPathPatterns("/apiv1/tool/**")
+		.addPathPatterns("/apiv1/board/**");
 //		.addPathPatterns("/collection/**")
 //		.addPathPatterns("/index")
 //		.addPathPatterns("/");

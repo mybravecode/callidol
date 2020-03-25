@@ -1,6 +1,5 @@
 package com.callidol.common;
 
-import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,14 +13,14 @@ public class CallInCache {
 	@Autowired
     private RedisOp redisOp;
 	
-	public static String Week = "week";
-	public static String Month = "month";
-	public static String Year = "year";
+	public final static String Week = "week";
+	public final static String Month = "month";
+	public final static String Year = "year";
 	
 	// key : idol-{boardType}-board-{week}
 	//value: 明星 和 明星的被打榜次数
 	//产生明星榜单
-	public String genIdolBoardId(String boardType, String timeValue) {
+	public static final String genIdolBoardId(String boardType, String timeValue) {
 		return String.format("idol-%s-board-%s", boardType, timeValue);
 		//idol-week-board-202013
 	}
@@ -29,15 +28,9 @@ public class CallInCache {
 	// key : user-{idolId}-{boardType}-board-{week} 
 	//value: userId 和 用户的打榜次数
 	//产生某个明星下 用户排名分数的榜单
-	public String genUserBoardId(Long idolId, String boardType, String timeValue) {
+	public static final String genUserBoardId(Long idolId, String boardType, String timeValue) {
 		return String.format("user-%s-%s-board-%s", idolId, boardType, timeValue);
 		//user-133-week-board-202013
-	}
-		
-	public static void main(String[] args) {
-		String timeValue = new DateUtil().getWeek();
-		System.out.println(new CallInCache().genIdolBoardId(CallInCache.Week, timeValue));
-		System.out.println(new CallInCache().genUserBoardId(133L, CallInCache.Week, timeValue));
 	}
 	
 	//增加某个明星的打榜数(周榜)
@@ -75,7 +68,11 @@ public class CallInCache {
 		redisOp.zincr(yearKey, userId, callNum);
 	}//
 	
-	public double getIdolCallNumWeek(long idolId) {
-		return redisOp.zscoreAndRank(genIdolBoardId(Week, new DateUtil().getWeek()), idolId);
+	public RankAndScore getIdolRankAndScoreByYear(long idolId, String timeValue) {
+		return redisOp.getRankAndScore(genIdolBoardId(Week, timeValue), idolId);
+	}
+	
+	public RankAndScore getUserRankAndScoreForIdolByWeek(long userId, Long idolId, String timeValue) {
+		return redisOp.getRankAndScore(genUserBoardId(idolId, Week, timeValue), userId);
 	}
 }

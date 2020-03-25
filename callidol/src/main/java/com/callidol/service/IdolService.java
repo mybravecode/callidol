@@ -6,6 +6,6 @@ public interface IdolService {
 
 	public CIResult searchIdolByName(String name);
 
-	public CIResult getIdolInfoById(Long id);
+	public CIResult getIdolInfoById(Long id, Long userId);
 
 }
