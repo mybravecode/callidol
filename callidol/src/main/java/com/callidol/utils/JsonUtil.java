@@ -2,6 +2,7 @@ package com.callidol.utils;
 
 import java.util.List;
 
+import com.callidol.pojo.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,7 +41,7 @@ public class JsonUtil {
             T t = MAPPER.readValue(jsonData, beanType);
             return t;
         } catch (Exception e) {
-        	e.printStackTrace();
+        	// e.printStackTrace();
         }
         return null;
     }
@@ -64,5 +65,9 @@ public class JsonUtil {
     	
     	return null;
     }
+    
+    public static void main(String[] args) {
+		System.out.println(JsonUtil.jsonToPojo(null, User.class));
+	}
     
 }

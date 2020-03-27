@@ -19,5 +19,6 @@ public class TestRedis {
     	System.out.println("=============");
     	System.out.println(redisOp.get("afdf"));
     	System.out.println("=============");
+    	redisOp.set("name", "wdw");
     }
 }

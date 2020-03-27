@@ -2,7 +2,7 @@ package com.callidol.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserResult {
     private Long id;
     

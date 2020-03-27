@@ -41,7 +41,7 @@ public class UserInCache {
 
 	// 根据用户id 得到第一个key:"user-result" + userId
 	private static String getUserMapName(long userId) {
-		return "user-result" + userId;
+		return "userId-" + userId + "-info";
 	}
 
 	// ---------------------RestCallChance 当前剩余打榜次数
@@ -98,6 +98,10 @@ public class UserInCache {
 		keys.add(RestCallChance);
 
 		long restChance = redisTemplate.execute(redisScript, keys, callNum.toString());
+		
+		//压力测试的时候使用
+		addRestCallChance(userId, callNum);
+		
 		return (int) restChance;
 	}
 

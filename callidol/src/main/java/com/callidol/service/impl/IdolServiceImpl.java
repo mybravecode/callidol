@@ -55,7 +55,7 @@ public class IdolServiceImpl implements IdolService{
 //			idolResult.setBrief(idol.getBrief()); 
 			RankAndScore rankAndScore = callInCache.getIdolRankAndScoreByYear(idol.getId(), dateUtil.getWeek());
 			//TODO 当前默认100
-			idolResult.setCalled((int)rankAndScore.getScore());
+			idolResult.setCalled(rankAndScore.getScore().intValue());
 			idolResult.setRank(rankAndScore.getRank());
 			idolResults.add(idolResult);
 		}
@@ -83,12 +83,12 @@ public class IdolServiceImpl implements IdolService{
 		RankAndScore rankAndScore = callInCache.getIdolRankAndScoreByYear(idolId, new DateUtil().getWeek());
 		
 		idolResult.setRank(rankAndScore.getRank());
-		idolResult.setCalled((int)rankAndScore.getScore());
+		idolResult.setCalled(rankAndScore.getScore().intValue());
 		
 		//将我给该明星打榜次数和排名弄进去
 		
 		RankAndScore userRankAndScore = callInCache.getUserRankAndScoreForIdolByWeek(userId, idolId, new DateUtil().getWeek());
-		idolResult.setUserCall((int)userRankAndScore.getScore());
+		idolResult.setUserCall(userRankAndScore.getScore().intValue());
 		idolResult.setUserRank(userRankAndScore.getRank());
 		return CIResult.ok("找到明星信息", idolResult);
 	}

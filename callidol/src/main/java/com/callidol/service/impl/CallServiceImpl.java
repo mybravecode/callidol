@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.callidol.common.CIResult;
 import com.callidol.common.CallInCache;
+import com.callidol.common.CallMsg;
 import com.callidol.common.RankAndScore;
 import com.callidol.common.UserInCache;
 import com.callidol.common.UserResult;
@@ -178,9 +179,9 @@ public class CallServiceImpl implements CallService{
 
 		
 		//1.判断明星对应id是否存在
-		Idol idol = idolMapper.selectByPrimaryKey(idolId); //null
-		if(idol == null)
-			return CIResult.error("明星id:" + idolId + "不存在");
+		//Idol idol = idolMapper.selectByPrimaryKey(idolId); //null
+		//if(idol == null)
+			//return CIResult.error("明星id:" + idolId + "不存在");
         
 		//2.判断是否还有剩余次数并且减去次数
 		//
@@ -203,35 +204,52 @@ public class CallServiceImpl implements CallService{
 		
 		
 		
-        if(restChance < 0) {
-        	if(restChance == -200)
-        		restChance = 0;
-        	RankAndScore userRankAndScore = callInCache.getUserRankAndScoreForIdolByWeek(userId, idolId, new DateUtil().getWeek());
-			userResult.setRestChance(-restChance);
-			userResult.setCall((int)userRankAndScore.getScore());
-			userResult.setRank(userRankAndScore.getRank());
-			return CIResult.error("打榜剩余票数不够，请重新输入打榜次数", userResult);
-		}
+//        if(restChance < 0) {
+//        	if(restChance == -200)
+//        		restChance = 0;
+//        	
+//        	//得到某个明星的榜单下，用户的打榜次数和排名
+//        	RankAndScore userRankAndScore = callInCache.getUserRankAndScoreForIdolByWeek(userId, idolId, new DateUtil().getWeek());
+//			userResult.setRestChance(-restChance);
+//			userResult.setCall(userRankAndScore.getScore().intValue());//打榜次数
+////			userResult.setRank(userRankAndScore.getRank());//排名
+//			return CIResult.error("打榜剩余票数不够，请重新输入打榜次数", userResult);
+//		}
         
 		//1 2 3 4 
 		
 		//3.增加明星对应的票数
 		//增加明星周榜月榜年榜  以及  某个明星打榜的周榜月榜年榜的用户排名
 		//避免代码太长太多单独分一个函数出来
-		userCallForHisIdol(userId, idolId, callNum);
 		
-		RankAndScore userRankAndScore = callInCache.getUserRankAndScoreForIdolByWeek(userId, idolId, new DateUtil().getWeek());
-		userResult.setRestChance(-restChance);
-		userResult.setCall((int)userRankAndScore.getScore());
-		userResult.setRestChance(restChance);
+		long time = new DateUtil().getTimeMillis();
+		CallMsg callMsg = new CallMsg();
+		callMsg.setCallNum(callNum);
+		callMsg.setIdolId(idolId);
+		callMsg.setTime(time);
+		callMsg.setUserId(userId);
+		
+		callInCache.setUserCallMsg(callMsg);
+	    // userCallForHisIdol(userId, idolId, callNum, new DateUtil());
+		
+	
 		return CIResult.ok("打榜成功", userResult);
 	}
 	
-	
-	private void userCallForHisIdol(long userId, long idolId, int callNum) {
-		DateUtil dateUtil = new DateUtil();
+	@Override
+	public void userCallForHisIdol(long userId, long idolId, int callNum, DateUtil dateUtil) {
+//		DateUtil dateUtil = new DateUtil();
 		callInCache.incrIdolCallNum(idolId, callNum, dateUtil);
 		callInCache.incrUserCallNum(idolId, userId, callNum, dateUtil);
+	}
+
+	@Override
+	public CIResult getUserRankAndScoreForIdol(Long idolId, Long userId) {
+	    RankAndScore rankAndScore = callInCache.getUserRankAndScoreForIdolByWeek(userId, idolId, new DateUtil().getWeek());
+	    UserResult userResult = new UserResult();
+	    userResult.setCall(rankAndScore.getIntScore());
+	    userResult.setRank(rankAndScore.getRank());
+	    return CIResult.ok("OK", userResult);
 	}
 	
 }

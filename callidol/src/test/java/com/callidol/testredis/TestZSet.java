@@ -1,5 +1,7 @@
 package com.callidol.testredis;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,9 +67,12 @@ public class TestZSet {
 //		keys.add("ZEEEET");
 //        keys.add("ttt");
         
-		RankAndScore rankAndScore = redisOp.getRankAndScore("ZEEEET", "wdw");
-		System.out.println(rankAndScore.getRank());
-		System.out.println(rankAndScore.getScore());
+//		RankAndScore rankAndScore = redisOp.getRankAndScore("ZEEEET", "wdw");
+//		System.out.println(rankAndScore.getRank());
+//		System.out.println(rankAndScore.getScore());
+		
+		List<RankAndScore> rankAndScoreList = redisOp.reverseRangeWithScores("12rafaf", 0, 20);
+		System.out.println(rankAndScoreList.size());
 	}
 	
 	

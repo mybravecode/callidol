@@ -7,4 +7,6 @@ repository
 .settings
 .classpath
 .project
-
+redis
+redis/
+redis.zip

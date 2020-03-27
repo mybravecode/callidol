@@ -3,14 +3,18 @@ package com.callidol.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.h2.H2ConsoleProperties.Settings;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
-import com.callidol.common.RankAndScore;
+import com.alibaba.druid.sql.ast.expr.SQLGroupingSetExpr;
+import com.callidol.common.RankAndScore;import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 
 
 /*
@@ -130,12 +134,12 @@ public class RedisOp {
     	return stringRedisTemplate.opsForZSet().incrementScore(zsetName, member.toString(), delta);
     }
     
-    //获取zset中某个成员的分数和排名
+    //获取zset中某个成员的分数和排名？？？？？？？？？？？？/     应该是 获取zset中某个明星成员的被打榜次数
     public double zscoreAndRank(String zsetName, Object member) {
     	return stringRedisTemplate.opsForZSet().score(zsetName, member.toString());//接受了多少次打榜
     }
     
-    //同时zset中同时获取分数和排名
+    //同时在zset中，获取分数和排名         获取某个明星的分数和排名
     public RankAndScore getRankAndScore(String zsetName, Object member) {	
 	    DefaultRedisScript<String> redisScript = new DefaultRedisScript<>();
         redisScript.setScriptText(GetRankAndScoreScript);
@@ -149,4 +153,53 @@ public class RedisOp {
       
         return JsonUtil.jsonToPojo(rankAndScore, RankAndScore.class);
     }
+    
+    //求排名在[start,end]之间的成员和分数
+    public List<RankAndScore> reverseRangeWithScores(String zsetName, int start, int end) {
+    	//从redis中取出排名在start，end之间的member和分数
+    	//当end=-1表示求start及开始后的所有排名信息
+    	if(end > 0)
+    		end -= 1;
+    	
+    	
+//    	Set<TypedTuple<String>> range = redisTemplate.opsForZSet().reverseRangeWithScores(zsetName, 0, -1);
+//    	for(TypedTuple<String> tuple: range) {
+//    		System.out.println(tuple.getScore()+"..."+(tuple.getValue()));
+//    	}
+    	
+    	Set<TypedTuple<String>> range = stringRedisTemplate.opsForZSet().reverseRangeWithScores(zsetName, start - 1, end);
+    	
+    	//
+    	List<RankAndScore> rankAndScoresList = new ArrayList<>(range.size());
+    	
+    	//从redis中取出排名在start，end之间的member和分数
+    	for(TypedTuple<String> tuple: range) {
+    		RankAndScore idolRankAndScore = new RankAndScore();
+    		
+    		idolRankAndScore.setIdolId(tuple.getValue());//明星的名字
+    		idolRankAndScore.setScore(tuple.getScore());//明星的被打榜次数
+    		idolRankAndScore.setRank(start++);//明星的排名
+    		
+    		rankAndScoresList.add(idolRankAndScore);
+    	}//
+    	
+    	return rankAndScoresList;
+    }
+    
+    //得到zset大小
+    public long zCount(String zsetName) {
+    	return stringRedisTemplate.opsForZSet().zCard(zsetName);
+    }
+    
+    
+    // --------------------list---------------
+    
+    public long lPush(String listName, String value) {
+    	return stringRedisTemplate.opsForList().leftPush(listName, value);
+    }
+    
+    public String rPopBlocking(String listName, long timeout, TimeUnit unit) {
+    	return stringRedisTemplate.opsForList().rightPop(listName, timeout, unit);
+    }
+    
 }

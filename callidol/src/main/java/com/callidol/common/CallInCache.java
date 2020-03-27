@@ -1,11 +1,15 @@
 package com.callidol.common;
 
 
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.callidol.utils.DateUtil;
+import com.callidol.utils.JsonUtil;
 import com.callidol.utils.RedisOp;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 
 @Component
@@ -68,11 +72,33 @@ public class CallInCache {
 		redisOp.zincr(yearKey, userId, callNum);
 	}//
 	
+	
+//  //同时在zset中，获取分数和排名         获取某个明星的分数和排名
+//  public RankAndScore getRankAndScore(String zsetName, Object member) {	
+	
+	//得到明星的榜单下，某个明星的打榜次数和排名
 	public RankAndScore getIdolRankAndScoreByYear(long idolId, String timeValue) {
-		return redisOp.getRankAndScore(genIdolBoardId(Week, timeValue), idolId);
+		String zsetName = genIdolBoardId(Week, timeValue);
+		return redisOp.getRankAndScore(zsetName, idolId);
 	}
 	
+	//得到某个明星的榜单下，用户的打榜次数和排名
 	public RankAndScore getUserRankAndScoreForIdolByWeek(long userId, Long idolId, String timeValue) {
-		return redisOp.getRankAndScore(genUserBoardId(idolId, Week, timeValue), userId);
+		String zsetName = genUserBoardId(idolId, Week, timeValue);
+		return redisOp.getRankAndScore(zsetName, userId);
 	}
+	
+	
+	public final static String CallMsgList = "user-callmsg-list";
+	
+	public void setUserCallMsg(CallMsg callMsg) {
+	    	redisOp.lPush(CallMsgList, JsonUtil.objectToJson(callMsg));
+	}
+	
+	public CallMsg getUserCallMsg(long timeout, TimeUnit unit) {
+		String callMsgStr = redisOp.rPopBlocking(CallMsgList, timeout, unit);
+		
+		return JsonUtil.jsonToPojo(callMsgStr, CallMsg.class);
+	}
+	
 }

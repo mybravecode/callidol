@@ -31,8 +31,8 @@ public class ValidatorInterceptor implements HandlerInterceptor{
 			throws Exception {
 		// TODO Auto-generated method stub
 		
-		System.out.println("调用用户身份验证拦截器");
-		System.out.println("session: " + session);
+//		System.out.println("调用用户身份验证拦截器");
+//		System.out.println("session: " + session);
 		
         String token = CookieUtil.getCookie(IdString.LoginTokenName, request);
 		
@@ -45,9 +45,9 @@ public class ValidatorInterceptor implements HandlerInterceptor{
 		
 		//1   2    3   4
 		//--------------------
-		
+//		System.out.println("token:>>>>>>>>>>" + token);
 		User user = session.getUser(token);
-		System.out.println("ValidatorInterceptor=====================session"+user);
+//		System.out.println("ValidatorInterceptor=====================user, session: "+user);
 		if(user == null) {
 			//session失效也要重新登录
 			//返回CIResult
@@ -81,7 +81,7 @@ public class ValidatorInterceptor implements HandlerInterceptor{
 		//清除线程变量的内容，防止内存泄漏
 		
 		// TODO Auto-generated method stub
-		System.out.println("业务处理完毕!!!!!!!!!!!!");
+//		System.out.println("业务处理完毕!!!!!!!!!!!!");
 	}
 	
 	public static User getUser() {
