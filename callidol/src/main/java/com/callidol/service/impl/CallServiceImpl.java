@@ -175,6 +175,7 @@ public class CallServiceImpl implements CallService{
 		
 		//1.判断明星对应id是否存在
 		Idol idol = idolMapper.selectByPrimaryKey(idolId); //null
+		
 		if(idol == null)
 			return CIResult.error("明星id:" + idolId + "不存在");
         
@@ -217,17 +218,22 @@ public class CallServiceImpl implements CallService{
 		//增加明星周榜月榜年榜  以及  某个明星打榜的周榜月榜年榜的用户排名
 		//避免代码太长太多单独分一个函数出来
 		
-		CallMsg callMsg = new CallMsg();
+//		CallMsg callMsg = new CallMsg();
+//		
+//		long time = new DateUtil().getTimeMillis();
+//		callMsg.setTime(time);
+//		
+//		callMsg.setCallNum(callNum);
+//		callMsg.setIdolId(idolId);
+//		callMsg.setUserId(userId);
 		
-		long time = new DateUtil().getTimeMillis();
-		callMsg.setTime(time);
+		RankAndScore userRankAndScore = callInCache.getUserRankAndScoreForIdolByWeek(userId, idolId, new DateUtil().getWeek());
+		userResult.setRestChance(restChance);
+		userResult.setCall(userRankAndScore.getScore().intValue());//打榜次数
+		userResult.setRank(userRankAndScore.getRank());//排名
 		
-		callMsg.setCallNum(callNum);
-		callMsg.setIdolId(idolId);
-		callMsg.setUserId(userId);
-		
-		callInCache.setUserCallMsg(callMsg);
-	    // userCallForHisIdol(userId, idolId, callNum, new DateUtil());
+		// callInCache.setUserCallMsg(callMsg);
+	    userCallForHisIdol(userId, idolId, callNum, new DateUtil());
 		
 		return CIResult.ok("打榜成功", userResult);
 	}

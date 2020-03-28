@@ -6,9 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.javassist.bytecode.Mnemonic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.callidol.common.BoardCache;
 import com.callidol.common.CIResult;
 import com.callidol.common.CallInCache;
 import com.callidol.common.IdolResult;
@@ -23,6 +26,7 @@ import com.callidol.service.BoardService;
 import com.callidol.utils.DateUtil;
 import com.callidol.utils.JsonUtil;
 import com.callidol.utils.RedisOp;
+import com.github.pagehelper.Page;
 
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.entity.Example.Criteria;
@@ -128,22 +132,25 @@ public class BoardServiceImpl implements BoardService{
     }
     
     
+    //hashMap 
 	@Override
-	public CIResult getIdolBoardWeekRank() {
+	@Cacheable(value=BoardCache.IdolWeekBoardCache, key="#week")
+	public CIResult getIdolBoardWeekRank(String week) {
 		//从本周排行榜中取出排名在1-20的明星
-        String boardId = CallInCache.genIdolBoardId(CallInCache.Week, new DateUtil().getWeek());
+        String boardId = CallInCache.genIdolBoardId(CallInCache.Week, week);
 		RankBoardResult< IdolResult> rankBoardResult = getIdolRankBoardInfo(boardId, 1, 20);
 		rankBoardResult.setMore(0);
 		return CIResult.ok("OK", rankBoardResult);
 		
 	}
 
-
 	@Override
-	public CIResult getIdolBoardMonthRank(int page, int size) {
+	@Cacheable(value=BoardCache.IdolMonthBoardCache, key="#month + #page + #size")
+	public CIResult getIdolBoardMonthRank(String month, int page, int size) {
 		int start = (page - 1) * size + 1;
 		int end = start + size - 1;
-        String boardId = CallInCache.genIdolBoardId(CallInCache.Month, new DateUtil().getMonth());
+//        String boardId = CallInCache.genIdolBoardId(CallInCache.Month, new DateUtil().getMonth());
+        String boardId = CallInCache.genIdolBoardId(CallInCache.Month, month);
 
 		long total = redisOp.zCount(boardId);
 		
@@ -165,10 +172,12 @@ public class BoardServiceImpl implements BoardService{
 	}
 
 	@Override
-	public CIResult getIdolBoardYearRank(int page, int size) {
+	@Cacheable(value=BoardCache.IdolYeayBoardCache, key="#year + #page + #size")
+	public CIResult getIdolBoardYearRank(String year, int page, int size) {
 		int start = (page - 1) * size + 1;
 		int end = start + size - 1;
-        String boardId = CallInCache.genIdolBoardId(CallInCache.Year, new DateUtil().getYear());
+//        String boardId = CallInCache.genIdolBoardId(CallInCache.Year, new DateUtil().getYear());
+        String boardId = CallInCache.genIdolBoardId(CallInCache.Year, year);
 
 		long total = redisOp.zCount(boardId);
 		
@@ -191,9 +200,12 @@ public class BoardServiceImpl implements BoardService{
     
 	
 	@Override
-	public CIResult getUserBoardWeekRank(long idolId) {
+	@Cacheable(value=BoardCache.UserWeekBoardCache, key="#week")
+	public CIResult getUserBoardWeekRank(String week, long idolId) {
 		//从本周排行榜中取出给idolId打榜排名在1-20的用户
-		String boardId = CallInCache.genUserBoardId(idolId, CallInCache.Week, new DateUtil().getWeek());
+//		String boardId = CallInCache.genUserBoardId(idolId, CallInCache.Week, new DateUtil().getWeek());
+		String boardId = CallInCache.genUserBoardId(idolId, CallInCache.Week, week);
+		
 		RankBoardResult<UserResult> rankBoardResult = getUserRankBoardInfo(boardId, 1, 20);
 		rankBoardResult.setMore(0);
 		return CIResult.ok("OK", rankBoardResult);
@@ -201,10 +213,12 @@ public class BoardServiceImpl implements BoardService{
 
 
 	@Override
-	public CIResult getUserBoardMonthRank(long idolId, int page, int size) {
+	@Cacheable(value=BoardCache.UserMonthBoardCache, key="#month + #page + #size")
+	public CIResult getUserBoardMonthRank(String month, long idolId, int page, int size) {
 		int start = (page - 1) * size + 1;
 		int end = start + size - 1;
-		String boardId = CallInCache.genUserBoardId(idolId, CallInCache.Month, new DateUtil().getMonth());
+//		String boardId = CallInCache.genUserBoardId(idolId, CallInCache.Month, new DateUtil().getMonth());
+		String boardId = CallInCache.genUserBoardId(idolId, CallInCache.Month, month);
 		/////////////////
 		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%"+boardId);
 
@@ -228,10 +242,12 @@ public class BoardServiceImpl implements BoardService{
 	}
 
 	@Override
-	public CIResult getUserBoardYearRank(long idolId, int page, int size) {
+	@Cacheable(value=BoardCache.UserYearBoardCache, key="#year + #page + #size")
+	public CIResult getUserBoardYearRank(String year, long idolId, int page, int size) {
 		int start = (page - 1) * size + 1;
 		int end = start + size - 1;
-        String boardId = CallInCache.genUserBoardId(idolId, CallInCache.Year, new DateUtil().getYear());
+//        String boardId = CallInCache.genUserBoardId(idolId, CallInCache.Year, new DateUtil().getYear());
+        String boardId = CallInCache.genUserBoardId(idolId, CallInCache.Year, year);
 
 		long total = redisOp.zCount(boardId);
 		
@@ -249,6 +265,5 @@ public class BoardServiceImpl implements BoardService{
 		}
 		
 		return CIResult.ok("OK", rankBoardResult);
-
 	}
 }

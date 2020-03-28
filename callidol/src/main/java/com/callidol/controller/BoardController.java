@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.callidol.common.CIResult;
 import com.callidol.service.BoardService;
+import com.callidol.utils.DateUtil;
 
 
 @RestController
@@ -17,7 +18,7 @@ public class BoardController {
     
     @RequestMapping("/idol/week")
     public CIResult getIdolBoardWeekRank() {
-        return boardService.getIdolBoardWeekRank();
+        return boardService.getIdolBoardWeekRank(new DateUtil().getWeek());
     }
     
     
@@ -25,7 +26,7 @@ public class BoardController {
     public CIResult getIdolBoardMonthRank(@RequestParam Integer page) {
     	if(page <= 0 || page > 5)
     		return CIResult.error("page 不合法 0<page<6");
-        return boardService.getIdolBoardMonthRank(page, 10);
+        return boardService.getIdolBoardMonthRank(new DateUtil().getMonth(), page, 10);
     }
     
     
@@ -33,13 +34,13 @@ public class BoardController {
     public CIResult getIdolBoardYearRank(@RequestParam Integer page) {
     	if(page <= 0 || page > 10)
     		return CIResult.error("page 不合法 0<page<11");
-        return boardService.getIdolBoardYearRank(page, 20);
+        return boardService.getIdolBoardYearRank(new DateUtil().getYear(), page, 20);
     }
     
     
     @RequestMapping("/user/week")
     public CIResult getUserBoardWeekRank(@RequestParam long idolId) {
-        return boardService.getUserBoardWeekRank(idolId);
+        return boardService.getUserBoardWeekRank(new DateUtil().getWeek(), idolId);
     }
     
     
@@ -47,7 +48,7 @@ public class BoardController {
     public CIResult getUserBoardMonthRank(@RequestParam long idolId, @RequestParam Integer page) {
     	if(page <= 0 || page > 5)
     		return CIResult.error("page 不合法 0<page<6");
-        return boardService.getUserBoardMonthRank(idolId, page, 10);
+        return boardService.getUserBoardMonthRank(new DateUtil().getMonth(), idolId, page, 10);
     }
     
     
@@ -55,7 +56,7 @@ public class BoardController {
     public CIResult getUserBoardYearRank(@RequestParam long idolId, @RequestParam Integer page) {
     	if(page <= 0 || page > 10)
     		return CIResult.error("page 不合法 0<page<11");
-        return boardService.getUserBoardYearRank(idolId, page, 20);
+        return boardService.getUserBoardYearRank(new DateUtil().getYear(), idolId, page, 20);
     }
     
 }
