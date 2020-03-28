@@ -27,7 +27,7 @@ public class AsyncCall {
 	@Autowired
 	private CallInCache callInCache;
 	
-	@Scheduled(fixedRate=20000)
+	@Scheduled(fixedRate=30*1000) //如果return ； 每30s 执行asyncCallForIdol()
     public void asyncCallForIdol() {
 		//去redis中拿取打榜信息
 		//根据信息异步完成增加明星和用户打榜数的任务

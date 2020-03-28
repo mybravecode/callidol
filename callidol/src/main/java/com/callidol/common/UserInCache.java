@@ -32,12 +32,18 @@ public class UserInCache {
 
 	public final static String ShareUrl = "ShareUrl";
 
-	public final static String callForIdolLuaScript = "local restChance = redis.call('HINCRBY', KEYS[1], KEYS[2], 0);"// 增加0个
-			+ "if restChance == 0 then " + "return -200;" + "end;" + "local callNum = tonumber(ARGV[1]);"// tonumber :
+	public final static String callForIdolLuaScript = 
+			  "local restChance = redis.call('HINCRBY', KEYS[1], KEYS[2], 0);"// 增加0个
+			+ "if restChance == 0 then " 
+			+     "return -200;" 
+			+ "end;" 
+			+ "local callNum = tonumber(ARGV[1]);"// tonumber :
 																											// 将String类型转化为int
-			+ "if restChance < callNum then " + "return -restChance;" // 如果剩余次数不够，返回-restChance
+			+ "if restChance < callNum then " 
+			+     "return -restChance;" // 如果剩余次数不够，返回-restChance
 			+ "else " // 否则 返回减去callNum的执行结果
-			+ "return redis.call('HINCRBY', KEYS[1], KEYS[2], -callNum);" + "end";
+			+     "return redis.call('HINCRBY', KEYS[1], KEYS[2], -callNum);" 
+			+ "end";
 
 	// 根据用户id 得到第一个key:"user-result" + userId
 	private static String getUserMapName(long userId) {
@@ -99,8 +105,8 @@ public class UserInCache {
 
 		long restChance = redisTemplate.execute(redisScript, keys, callNum.toString());
 		
-		//压力测试的时候使用
-		addRestCallChance(userId, callNum);
+		// 压力测试的时候使用
+		// addRestCallChance(userId, callNum);
 		
 		return (int) restChance;
 	}

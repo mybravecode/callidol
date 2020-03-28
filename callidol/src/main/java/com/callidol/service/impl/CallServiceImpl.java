@@ -173,15 +173,10 @@ public class CallServiceImpl implements CallService{
 	@Override
 	public CIResult callForIdol(long idolId, int callNum, long userId) {
 		
-		
-		
-//    	return redisOp.hIncrement(getUserMapName(userId), LastGetFreeChanceTime, 0);
-
-		
 		//1.判断明星对应id是否存在
-		//Idol idol = idolMapper.selectByPrimaryKey(idolId); //null
-		//if(idol == null)
-			//return CIResult.error("明星id:" + idolId + "不存在");
+		Idol idol = idolMapper.selectByPrimaryKey(idolId); //null
+		if(idol == null)
+			return CIResult.error("明星id:" + idolId + "不存在");
         
 		//2.判断是否还有剩余次数并且减去次数
 		//
@@ -204,17 +199,17 @@ public class CallServiceImpl implements CallService{
 		
 		
 		
-//        if(restChance < 0) {
-//        	if(restChance == -200)
-//        		restChance = 0;
-//        	
-//        	//得到某个明星的榜单下，用户的打榜次数和排名
-//        	RankAndScore userRankAndScore = callInCache.getUserRankAndScoreForIdolByWeek(userId, idolId, new DateUtil().getWeek());
-//			userResult.setRestChance(-restChance);
-//			userResult.setCall(userRankAndScore.getScore().intValue());//打榜次数
-////			userResult.setRank(userRankAndScore.getRank());//排名
-//			return CIResult.error("打榜剩余票数不够，请重新输入打榜次数", userResult);
-//		}
+        if(restChance < 0) {
+        	if(restChance == -200)
+        		restChance = 0;
+        	
+        	//得到某个明星的榜单下，用户的打榜次数和排名
+        	RankAndScore userRankAndScore = callInCache.getUserRankAndScoreForIdolByWeek(userId, idolId, new DateUtil().getWeek());
+			userResult.setRestChance(-restChance);
+			userResult.setCall(userRankAndScore.getScore().intValue());//打榜次数
+			userResult.setRank(userRankAndScore.getRank());//排名
+			return CIResult.error("打榜剩余票数不够，请重新输入打榜次数", userResult);
+		}
         
 		//1 2 3 4 
 		
@@ -222,17 +217,18 @@ public class CallServiceImpl implements CallService{
 		//增加明星周榜月榜年榜  以及  某个明星打榜的周榜月榜年榜的用户排名
 		//避免代码太长太多单独分一个函数出来
 		
-		long time = new DateUtil().getTimeMillis();
 		CallMsg callMsg = new CallMsg();
+		
+		long time = new DateUtil().getTimeMillis();
+		callMsg.setTime(time);
+		
 		callMsg.setCallNum(callNum);
 		callMsg.setIdolId(idolId);
-		callMsg.setTime(time);
 		callMsg.setUserId(userId);
 		
 		callInCache.setUserCallMsg(callMsg);
 	    // userCallForHisIdol(userId, idolId, callNum, new DateUtil());
 		
-	
 		return CIResult.ok("打榜成功", userResult);
 	}
 	

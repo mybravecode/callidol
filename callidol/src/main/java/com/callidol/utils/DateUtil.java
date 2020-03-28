@@ -6,13 +6,13 @@ public class DateUtil {
 	
 	private Calendar cal = Calendar.getInstance();
     
-	public long getTimeMillis() {
-		return cal.getTimeInMillis();
-	}
-	
 	public DateUtil(long time) {
 		// https://blog.csdn.net/yhj19920417/article/details/73799842
 		cal.setTimeInMillis(time);
+	}
+	
+	public long getTimeMillis() {
+		return cal.getTimeInMillis();
 	}
 	
 	public DateUtil() {}
